@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  db:
+    container_name: stgbot_db
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - stgbot-network
+
+  queue-bus:
+    container_name: stgbot_queue-bus
+    image: rabbitmq:3.7.5-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - stgbot-network
+
+  redis:
+    container_name: stgbot_redis
+    image: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - stgbot-network
+
+volumes:
+  pg-data:
+
+networks:
+  - stgbot-network:
+      external: true
