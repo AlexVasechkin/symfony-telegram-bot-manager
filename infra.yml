@@ -38,5 +38,5 @@ volumes:
   pg-data:
 
 networks:
-  - stgbot-network:
-      external: true
+  stgbot-network:
+    external: true
