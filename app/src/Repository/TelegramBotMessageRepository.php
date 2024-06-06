@@ -15,4 +15,30 @@ class TelegramBotMessageRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TelegramBotMessage::class);
     }
+
+    /**
+     * @param int $limit
+     * @return TelegramBotMessage[]
+     */
+    public function getMessagesToSend(int $limit = 50): array
+    {
+        $qb = $this->createQueryBuilder('m');
+
+        $qb->where('1 = 1');
+
+        $qb->andWhere('m.isSent = :sent');
+        $qb->setParameter('sent', false);
+
+        $qb->orderBy('m.priority');
+        $qb->orderBy('m.createdAt');
+
+        $qb->setMaxResults($limit);
+
+//        $qb->select('m.id');
+
+        return $qb
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

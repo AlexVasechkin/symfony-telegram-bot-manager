@@ -6,6 +6,12 @@
 parameters:
     telegram_route_secret: '%env(TELEGRAM_BOT_TOKEN)%'
 
+    app.bot:
+        http:
+            host: '%env(APP_BOT_LISTENER_HTTP_HOST)%'
+            route: '%env(APP_BOT_LISTENER_HTTP_ROUTE)%'
+            headers: '%env(json:APP_BOT_LISTENER_HTTP_HEADER)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:

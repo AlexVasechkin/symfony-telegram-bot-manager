@@ -2,36 +2,26 @@
 
 namespace App\Entity;
 
-use App\Repository\TelegramBotMessageRepository;
+use App\Repository\TelegramBotUpdateRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TelegramBotMessageRepository::class)]
-#[ORM\Index(columns: ['type'])]
-#[ORM\Index(columns: ['chat_id'])]
-#[ORM\Index(columns: ['created_at'])]
-#[ORM\Index(columns: ['is_sent'])]
-#[ORM\Index(columns: ['priority'])]
-class TelegramBotMessage
+#[ORM\Entity(repositoryClass: TelegramBotUpdateRepository::class)]
+#[ORM\Index(name: 'ix__type', columns: ['type'])]
+class TelegramBotUpdate
 {
-    public const TYPE_MESSAGE = 'message';
-    public const TYPE_PHOTO = 'photo';
+    public const TYPE_CALLBACK_QUERY = 'callback_query';
 
-    public const PRIORITY_LOW = 60;
-    public const PRIORITY_NORMAL = 50;
-    public const PRIORITY_HIGH = 40;
-    public const PRIORITY_IMMEDIATE = 30;
+    public const TYPE_MESSAGE = 'message';
+
+    public const TYPE_OTHER = 'other';
 
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(options: ['unsigned' => true])]
+    #[ORM\Column(type: Types::BIGINT, options: ['unsigned' => true])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     private ?string $type = null;
-
-    #[ORM\Column(options: ['unsigned' => true])]
-    private ?int $chatId = null;
 
     #[ORM\Column]
     private array $data = [];
@@ -39,13 +29,7 @@ class TelegramBotMessage
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(options: ['default' => false])]
-    private ?bool $isSent = false;
-
-    #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $priority = null;
-
-    #[ORM\OneToOne(mappedBy: 'telegramBotMessage', cascade: ['persist'])]
+    #[ORM\OneToOne(mappedBy: 'telegramBotUpdate', cascade: ['persist'])]
     private ?TelegramBotUpdateResponse $telegramBotUpdateResponse = null;
 
     public function getId(): ?int
@@ -53,15 +37,9 @@ class TelegramBotMessage
         return $this->id;
     }
 
-    public function getChatId(): ?int
+    public function setId(int $id): self
     {
-        return $this->chatId;
-    }
-
-    public function setChatId(int $chat_id): static
-    {
-        $this->chatId = $chat_id;
-
+        $this->id = $id;
         return $this;
     }
 
@@ -73,7 +51,6 @@ class TelegramBotMessage
     public function setData(array $data): static
     {
         $this->data = $data;
-
         return $this;
     }
 
@@ -85,19 +62,6 @@ class TelegramBotMessage
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function isSent(): ?bool
-    {
-        return $this->isSent;
-    }
-
-    public function setSent(bool $isSent): static
-    {
-        $this->isSent = $isSent;
-
         return $this;
     }
 
@@ -113,18 +77,6 @@ class TelegramBotMessage
         return $this;
     }
 
-    public function getPriority(): ?int
-    {
-        return $this->priority;
-    }
-
-    public function setPriority(int $priority): static
-    {
-        $this->priority = $priority;
-
-        return $this;
-    }
-
     public function getTelegramBotUpdateResponse(): ?TelegramBotUpdateResponse
     {
         return $this->telegramBotUpdateResponse;
@@ -133,8 +85,8 @@ class TelegramBotMessage
     public function setTelegramBotUpdateResponse(TelegramBotUpdateResponse $telegramBotUpdateResponse): static
     {
         // set the owning side of the relation if necessary
-        if ($telegramBotUpdateResponse->getTelegramBotMessage() !== $this) {
-            $telegramBotUpdateResponse->setTelegramBotMessage($this);
+        if ($telegramBotUpdateResponse->getTelegramBotUpdate() !== $this) {
+            $telegramBotUpdateResponse->setTelegramBotUpdate($this);
         }
 
         $this->telegramBotUpdateResponse = $telegramBotUpdateResponse;

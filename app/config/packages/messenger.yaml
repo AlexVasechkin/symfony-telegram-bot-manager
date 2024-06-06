@@ -5,15 +5,18 @@ framework:
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-             default: '%env(MESSENGER_TRANSPORT_DSN)%/default'
-             tg-bot-in: '%env(MESSENGER_TRANSPORT_DSN)%/tg-bot-in'
-             tg-bot-out: '%env(MESSENGER_TRANSPORT_DSN)%/tg-bot-out'
+             default: '%env(MESSENGER_TRANSPORT_DSN)%/tg-bot-default'
+             accept-updates: '%env(MESSENGER_TRANSPORT_DSN)%/tg-bot-accept-upd'
+             api: '%env(MESSENGER_TRANSPORT_DSN)%/tg-bot-api'
             # failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
 
         routing:
             # Route your messages to the transports
-             'App\Message\SaveTelegramBotMessage': tg-bot-in
+             App\Message\SaveTelegramBotUpdateMessage: accept-updates
+             App\Message\SayNewTelegramBotUpdateMessage: default
+             App\Message\SaveTelegramBotMessageMessage: api
+             App\Message\SendTelegramBotMessageMessage: default
 
 # when@test:
 #    framework:
