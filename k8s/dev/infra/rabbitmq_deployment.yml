@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbit-dployment
+spec:
+  selector:
+    matchLabels:
+      components: rabbit
+  template:
+    metadata:
+      labels:
+        components: rabbit
+    spec:
+      containers:
+      - name: tg-rabbit
+        image: rabbitmq:3-management
+        env:
+          - name: RABBITMQ_DEFAULT_USER
+            value: user
+          - name: RABBITMQ_DEFAULT_PASS
+            value: password
+        ports:
+          - containerPort: 5672
+          - containerPort: 15672
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "1000m"

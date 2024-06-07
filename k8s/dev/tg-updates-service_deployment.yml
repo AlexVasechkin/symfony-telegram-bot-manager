@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tg-get-updates-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      components: tg-get-updates
+  template:
+    metadata:
+      labels:
+        components: tg-get-updates
+    spec:
+      containers:
+      - name: tg-get-updates
+        image: tg-bot-manager
+        imageTag: dev
+        imagePullPolicy: Never
+        command : ["php"]
+        args : ["bin/console", "app:get-updates:service:run"]
+        envFrom:
+        - configMapRef:
+            name: tg-app-configmap
+        env:
+        - name: APP_ENV
+          value: dev
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+        volumeMounts:
+        - name: var-vol
+          mountPath: /var/www/html/var
+          subPath: var
+        - name: app-env
+          mountPath: /var/www/html/.env
+          subPath: .env
+      volumes:
+      - name: var-vol
+        persistentVolumeClaim:
+          claimName: tg-var-pvc
+      - name: app-env
+        configMap:
+          name: tg-app-configmap
+          defaultMode: 420

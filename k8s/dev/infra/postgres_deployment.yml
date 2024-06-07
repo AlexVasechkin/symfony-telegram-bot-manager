@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      components: postgres
+  template:
+    metadata:
+      name: postgres
+      labels:
+        components: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16.2
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_DB
+            value: tg-bot
+          - name: POSTGRES_USER
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            value: '123456'
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "1000m"
+        volumeMounts:
+          - name: postgres-data
+            mountPath: /var/lib/postgresql/data
+            subPath: data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc

@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tg-consumer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      components: tg-consumer
+  template:
+    metadata:
+      labels:
+        components: tg-consumer
+    spec:
+      containers:
+      - name: tg-consumer
+        image: tg-bot-manager
+        imageTag: dev
+        imagePullPolicy: Never
+        command : ["php"]
+        args : ["bin/console", "app:telegram-bot:send-message:service:run"]
+        envFrom:
+        - configMapRef:
+            name: tg-app-configmap
+        env:
+        - name: APP_ENV
+          value: dev
+        resources:
+          requests:
+            cpu: "2000m"
+            memory: "2Gi"
+        volumeMounts:
+        - name: var-vol
+          mountPath: /var/www/html/var
+          subPath: var
+        - name: app-env
+          mountPath: /var/www/html/.env
+          subPath: .env
+        - name: consumer-config
+          mountPath: /etc/supervisor/conf.d/consumer.conf
+          subPath: consumer-config
+      volumes:
+      - name: var-vol
+        persistentVolumeClaim:
+          claimName: tg-var-pvc
+      - name: app-env
+        configMap:
+          name: tg-app-configmap
+          defaultMode: 420
+      - name: consumer-config
+        configMap:
+          name: tg-consumer-configmap
+          defaultMode: 420

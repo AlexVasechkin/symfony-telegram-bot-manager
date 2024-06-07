@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-clusterip
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+  selector:
+    components: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-clusterip
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5672
+      name: main
+      protocol: TCP
+    - port: 15672
+      name: management
+      protocol: TCP
+  selector:
+    components: rabbit
