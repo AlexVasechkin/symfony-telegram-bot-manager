@@ -103,6 +103,8 @@ RUN mkdir -p /tmp/node && \
 
 EXPOSE 80
 
+EXPOSE 8000
+
 COPY ./supervisor/conf/supervisord.conf /etc/supervisor/supervisord.conf
 
 COPY ./supervisor/conf/conf.d /etc/supervisor/conf.d
