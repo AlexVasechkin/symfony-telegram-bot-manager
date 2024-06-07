@@ -24,7 +24,12 @@ final class SaveTelegramBotUpdateMessageHandler
         try {
             $update = $this->createTelegramBotUpdate->execute($message);
 
-            $this->messageBus->dispatch(new SayNewTelegramBotUpdateMessage(json_encode($update->getData())));
+            $this->messageBus->dispatch(new SayNewTelegramBotUpdateMessage(json_encode([
+                'chat_id' => $update->getChatId(),
+                'type' => $update->getType(),
+                'payload' => $update->getPayload(),
+                'update' => $update->getData()
+            ])));
 
         } catch (Throwable $e) {
             $this->logger->error(implode(PHP_EOL, [

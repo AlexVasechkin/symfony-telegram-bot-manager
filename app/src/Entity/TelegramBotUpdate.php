@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TelegramBotUpdateRepository::class)]
 #[ORM\Index(name: 'ix__type', columns: ['type'])]
+#[ORM\Index(columns: ['chat_id'])]
 class TelegramBotUpdate
 {
     public const TYPE_CALLBACK_QUERY = 'callback_query';
@@ -31,6 +32,12 @@ class TelegramBotUpdate
 
     #[ORM\OneToOne(mappedBy: 'telegramBotUpdate', cascade: ['persist'])]
     private ?TelegramBotUpdateResponse $telegramBotUpdateResponse = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private ?int $chatId = null;
+
+    #[ORM\Column(length: 8000, nullable: true)]
+    private ?string $payload = null;
 
     public function getId(): ?int
     {
@@ -90,6 +97,30 @@ class TelegramBotUpdate
         }
 
         $this->telegramBotUpdateResponse = $telegramBotUpdateResponse;
+
+        return $this;
+    }
+
+    public function getChatId(): ?int
+    {
+        return $this->chatId;
+    }
+
+    public function setChatId(int $chatId): static
+    {
+        $this->chatId = $chatId;
+
+        return $this;
+    }
+
+    public function getPayload(): ?string
+    {
+        return $this->payload;
+    }
+
+    public function setPayload(?string $payload): static
+    {
+        $this->payload = $payload;
 
         return $this;
     }

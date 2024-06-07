@@ -59,7 +59,12 @@ class TestCommand extends Command
 //            ]
 //        ]));
 
-        $this->sendAllMessagesAction->execute();
+//        preg_match('|^/start.*|', ' /start', $matches);
+        preg_match('|^/auth (.*) (.*)$|', '/auth av.vasechkin 12345', $matches);
+
+        dd($matches);
+
+//        $this->sendAllMessagesAction->execute();
 
         return Command::SUCCESS;
     }

@@ -27,6 +27,56 @@ class CreateTelegramBotUpdateAction
         }
     }
 
+    private function setChatIdFromMessage(TelegramBotUpdate $update): void
+    {
+        $chatId = (($update->getData()['message'] ?? [])['from'] ?? [])['id'] ?? 0;
+        is_int($chatId) || $chatId = 0;
+        $update->setChatId($chatId);
+    }
+
+    private function setChatIdFromCallbackQuery(TelegramBotUpdate $update): void
+    {
+        $chatId = (($update->getData()['callback_query'] ?? [])['from'] ?? [])['id'] ?? 0;
+        is_int($chatId) || $chatId = 0;
+        $update->setChatId($chatId);
+    }
+
+    private function setChatId(TelegramBotUpdate $update): void
+    {
+        if (TelegramBotUpdate::TYPE_MESSAGE === $update->getType()) {
+            $this->setChatIdFromMessage($update);
+        } elseif (TelegramBotUpdate::TYPE_CALLBACK_QUERY === $update->getType()) {
+            $this->setChatIdFromCallbackQuery($update);
+        } else {
+            $update->setChatId(0);
+        }
+    }
+
+    private function setPayloadFromMessage(TelegramBotUpdate $update): void
+    {
+        $payload = ($update->getData()['message'] ?? [])['text'] ?? '';
+        is_string($payload) || $payload = '';
+        $update->setPayload($payload);
+    }
+
+    private function setPayloadFromCallbackQuery(TelegramBotUpdate $update): void
+    {
+        $payload = ($update->getData()['callback_query'] ?? [])['data'] ?? '';
+        is_string($payload) || $payload = '';
+        $update->setPayload($payload);
+    }
+
+    private function setPayload(TelegramBotUpdate $update): void
+    {
+        if (TelegramBotUpdate::TYPE_MESSAGE === $update->getType()) {
+            $this->setPayloadFromMessage($update);
+        } elseif (TelegramBotUpdate::TYPE_CALLBACK_QUERY === $update->getType()) {
+            $this->setPayloadFromCallbackQuery($update);
+        } else {
+            $update->setPayload(null);
+        }
+    }
+
     public function execute(CreateTelegramBotUpdateDTOInterface $args): TelegramBotUpdate
     {
         $updateId = $args->getTelegramBotUpdateData()['update_id'] ?? null;
@@ -36,14 +86,16 @@ class CreateTelegramBotUpdateAction
             throw new Exception(sprintf('Update[id: %s] already exists', $updateId));
         }
 
-        $type = $this->getType($args);
-
         $update = (new TelegramBotUpdate())
             ->setId($updateId)
-            ->setType($type)
+            ->setType($this->getType($args))
             ->setData($args->getTelegramBotUpdateData())
             ->setCreatedAt(new DateTime())
         ;
+
+        $this->setChatId($update);
+
+        $this->setPayload($update);
 
         $this->entityManager->persist($update);
         $this->entityManager->flush();
