@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['created_at'])]
 #[ORM\Index(columns: ['is_sent'])]
 #[ORM\Index(columns: ['priority'])]
+#[ORM\Index(columns: ['message_id'])]
 class TelegramBotMessage
 {
     public const TYPE_MESSAGE = 'message';
@@ -47,6 +48,9 @@ class TelegramBotMessage
 
     #[ORM\OneToOne(mappedBy: 'telegramBotMessage', cascade: ['persist'])]
     private ?TelegramBotUpdateResponse $telegramBotUpdateResponse = null;
+
+    #[ORM\Column(type: Types::BIGINT, options: ['unsigned' => true, 'default' => 0])]
+    private ?string $messageId = null;
 
     public function getId(): ?int
     {
@@ -138,6 +142,18 @@ class TelegramBotMessage
         }
 
         $this->telegramBotUpdateResponse = $telegramBotUpdateResponse;
+
+        return $this;
+    }
+
+    public function getMessageId(): ?string
+    {
+        return $this->messageId;
+    }
+
+    public function setMessageId(string $messageId): static
+    {
+        $this->messageId = $messageId;
 
         return $this;
     }

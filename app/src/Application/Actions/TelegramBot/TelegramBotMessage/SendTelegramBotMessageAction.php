@@ -61,13 +61,20 @@ class SendTelegramBotMessageAction
     public function execute(TelegramBotMessage $message): void
     {
         try {
+            $tgMessage = null;
             if (TelegramBotMessage::TYPE_MESSAGE === $message->getType()) {
-                $this->sendMessage($message);
+                $tgMessage = $this->sendMessage($message);
             } elseif (TelegramBotMessage::TYPE_PHOTO === $message->getType()) {
-                $this->sendPhoto($message);
+                $tgMessage = $this->sendPhoto($message);
             }
+
+            if ($tgMessage) {
+                $message->setMessageId(intval($tgMessage->getMessageId()));
+            }
+
         } finally {
-            $this->entityManager->persist($message->setSent(true));
+            $message->setSent(true);
+            $this->entityManager->persist($message);
             $this->entityManager->flush();
         }
     }
