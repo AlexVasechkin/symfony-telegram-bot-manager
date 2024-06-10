@@ -34,8 +34,6 @@ class TelegramBotMessageRepository extends ServiceEntityRepository
 
         $qb->setMaxResults($limit);
 
-//        $qb->select('m.id');
-
         return $qb
             ->getQuery()
             ->getResult()

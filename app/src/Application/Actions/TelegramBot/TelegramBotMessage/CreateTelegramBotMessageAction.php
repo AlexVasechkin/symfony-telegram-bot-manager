@@ -4,10 +4,12 @@ namespace App\Application\Actions\TelegramBot\TelegramBotMessage;
 
 use App\Application\Contracts\TelegramBot\CreateTelegramBotMessageDTOInterface;
 use App\Entity\TelegramBotMessage;
+use App\Entity\TelegramBotMessageEventAction;
 use App\Entity\TelegramBotUpdateResponse;
 use App\Repository\TelegramBotUpdateRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Throwable;
 
 class CreateTelegramBotMessageAction
 {
@@ -24,6 +26,7 @@ class CreateTelegramBotMessageAction
             ->setData($args->getData())
             ->setCreatedAt(new DateTime())
             ->setPriority(TelegramBotMessage::PRIORITY_NORMAL)
+            ->setMessageId(0)
         ;
 
         $this->entityManager->persist($message);
@@ -50,6 +53,21 @@ class CreateTelegramBotMessageAction
         }
 
         $this->entityManager->flush();
+
+        try {
+            foreach ($args->getActions() as $action) {
+                $this->entityManager->persist(
+                    (new TelegramBotMessageEventAction())
+                        ->setTelegramBotMessage($message)
+                        ->setEvent(sprintf('%s', $action['event'] ?? ''))
+                        ->setAction(sprintf('%s', $action['action'] ?? ''))
+                );
+            }
+        } catch (Throwable) {
+            // do nothing
+        } finally {
+            $this->entityManager->flush();
+        }
 
         return $message;
     }

@@ -11,4 +11,6 @@ interface CreateTelegramBotMessageDTOInterface extends GetChatIdInterface
     public function getUpdateId(): ?int;
 
     public function getPriority(): ?int;
+
+    public function getActions(): array;
 }

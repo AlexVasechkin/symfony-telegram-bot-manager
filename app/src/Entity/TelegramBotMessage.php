@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TelegramBotMessageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -51,6 +53,17 @@ class TelegramBotMessage
 
     #[ORM\Column(type: Types::BIGINT, options: ['unsigned' => true, 'default' => 0])]
     private ?string $messageId = null;
+
+    /**
+     * @var Collection<int, TelegramBotMessageEventAction>
+     */
+    #[ORM\OneToMany(targetEntity: TelegramBotMessageEventAction::class, mappedBy: 'telegramBotMessage')]
+    private Collection $telegramBotMessageEventActions;
+
+    public function __construct()
+    {
+        $this->telegramBotMessageEventActions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -154,6 +167,36 @@ class TelegramBotMessage
     public function setMessageId(string $messageId): static
     {
         $this->messageId = $messageId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TelegramBotMessageEventAction>
+     */
+    public function getTelegramBotMessageEventActions(): Collection
+    {
+        return $this->telegramBotMessageEventActions;
+    }
+
+    public function addTelegramBotMessageEventAction(TelegramBotMessageEventAction $telegramBotMessageEventAction): static
+    {
+        if (!$this->telegramBotMessageEventActions->contains($telegramBotMessageEventAction)) {
+            $this->telegramBotMessageEventActions->add($telegramBotMessageEventAction);
+            $telegramBotMessageEventAction->setTelegramBotMessage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTelegramBotMessageEventAction(TelegramBotMessageEventAction $telegramBotMessageEventAction): static
+    {
+        if ($this->telegramBotMessageEventActions->removeElement($telegramBotMessageEventAction)) {
+            // set the owning side to null (unless already changed)
+            if ($telegramBotMessageEventAction->getTelegramBotMessage() === $this) {
+                $telegramBotMessageEventAction->setTelegramBotMessage(null);
+            }
+        }
 
         return $this;
     }
